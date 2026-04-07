@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Hogar</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #050505;
+      color: #ffb000;
+      font-family: "Courier New", monospace;
+      overflow: hidden;
+    }
+
+    .screen {
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+      padding: 18px 26px 18px 26px;
+      display: grid;
+      grid-template-rows: 78px 1fr 96px;
+      gap: 10px;
+      background-image:
+        linear-gradient(rgba(255,176,0,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,176,0,0.06) 1px, transparent 1px);
+      background-size: 28px 28px, 28px 28px;
+      background-position: center center;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+    }
+
+    .clock {
+      font-size: 58px;
+      line-height: 1;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(255,176,0,0.35);
+    }
+
+    .threat {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      line-height: 1;
+      padding-top: 6px;
+      text-shadow: 0 0 8px rgba(255,176,0,0.25);
+    }
+
+    .shield {
+      width: 24px;
+      height: 28px;
+      display: inline-block;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 720px 1fr;
+      align-items: start;
+    }
+
+    .plans {
+      grid-column: 2;
+      display: grid;
+      grid-template-rows: 1.45fr 1fr;
+      gap: 22px;
+      min-height: 0;
+    }
+
+    .panel {
+      position: relative;
+      border: 1px solid rgba(255,176,0,0.18);
+      box-shadow: inset 0 0 20px rgba(255,176,0,0.04);
+      padding: 16px 14px 12px 14px;
+      min-height: 0;
+      background: rgba(0,0,0,0.18);
+    }
+
+    .panel-title {
+      position: absolute;
+      top: -9px;
+      right: 16px;
+      background: #050505;
+      padding: 0 8px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: rgba(255,176,0,0.9);
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .wall {
+      stroke: #ffb000;
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: square;
+      shape-rendering: crispEdges;
+      filter: drop-shadow(0 0 2px rgba(255,176,0,0.35));
+    }
+
+    .wall-soft {
+      stroke: rgba(255,176,0,0.55);
+      stroke-width: 1.4;
+      fill: none;
+      shape-rendering: crispEdges;
+    }
+
+    .dash {
+      stroke: rgba(255,176,0,0.42);
+      stroke-width: 1.4;
+      fill: none;
+      stroke-dasharray: 8 7;
+      shape-rendering: crispEdges;
+    }
+
+    .door {
+      stroke: #ffb000;
+      stroke-width: 4.5;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 4px rgba(255,176,0,0.45));
+    }
+
+    .label {
+      fill: #ffb000;
+      font-size: 13px;
+      text-anchor: middle;
+      text-shadow: 0 0 6px rgba(255,176,0,0.25);
+    }
+
+    .label-small {
+      fill: rgba(255,176,0,0.92);
+      font-size: 11px;
+      text-anchor: middle;
+    }
+
+    .hud {
+      fill: rgba(255,176,0,0.55);
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: end;
+    }
+
+    .info-box {
+      border-top: 1px solid rgba(255,176,0,0.24);
+      padding-top: 10px;
+    }
+
+    .info-title {
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: rgba(255,176,0,0.74);
+      margin-bottom: 8px;
+    }
+
+    .info-value {
+      font-size: 30px;
+      line-height: 1.1;
+      text-shadow: 0 0 8px rgba(255,176,0,0.2);
+    }
+
+    .agenda-value {
+      font-size: 22px;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div class="topbar">
+      <div class="clock" id="clock">00:00</div>
+
+      <div class="threat">
+        <svg class="shield" viewBox="0 0 24 28" aria-hidden="true">
+          <path d="M12 1 L22 5 V12 C22 19 17 24 12 27 C7 24 2 19 2 12 V5 Z"
+                fill="none" stroke="#ffb000" stroke-width="2"/>
+        </svg>
+        <div>AMENAZAS DETECTADAS: 0</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="plans">
+
+        <div class="panel">
+          <div class="panel-title">PLANTA BAJA</div>
+          <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" aria-label="Plano planta baja">
+            <line x1="18" y1="18" x2="70" y2="18" class="wall-soft"/>
+            <line x1="18" y1="18" x2="18" y2="50" class="wall-soft"/>
+            <line x1="702" y1="18" x2="650" y2="18" class="wall-soft"/>
+            <line x1="702" y1="18" x2="702" y2="50" class="wall-soft"/>
+            <line x1="18" y1="342" x2="70" y2="342" class="wall-soft"/>
+            <line x1="18" y1="342" x2="18" y2="310" class="wall-soft"/>
+            <line x1="702" y1="342" x2="650" y2="342" class="wall-soft"/>
+            <line x1="702" y1="342" x2="702" y2="310" class="wall-soft"/>
+
+            <rect x="190" y="26" width="430" height="90" class="dash"/>
+            <text x="405" y="78" class="label">JARDÍN TRASERO</text>
+
+            <line x1="190" y1="116" x2="190" y2="310" class="wall"/>
+            <line x1="190" y1="116" x2="214" y2="116" class="door"/>
+            <line x1="190" y1="208" x2="212" y2="208" class="door"/>
+
+            <line x1="238" y1="116" x2="362" y2="116" class="wall"/>
+            <line x1="362" y1="116" x2="362" y2="206" class="wall"/>
+            <line x1="362" y1="116" x2="620" y2="116" class="wall"/>
+            <line x1="620" y1="116" x2="620" y2="208" class="wall"/>
+            <line x1="620" y1="208" x2="414" y2="208" class="wall"/>
+            <line x1="500" y1="172" x2="500" y2="208" class="wall-soft"/>
+            <line x1="500" y1="172" x2="620" y2="172" class="wall-soft"/>
+
+            <line x1="240" y1="208" x2="372" y2="208" class="wall"/>
+            <line x1="240" y1="208" x2="240" y2="266" class="wall"/>
+            <line x1="240" y1="266" x2="338" y2="266" class="wall"/>
+            <line x1="362" y1="208" x2="362" y2="268" class="wall"/>
+            <line x1="362" y1="280" x2="362" y2="308" class="wall"/>
+            <line x1="230" y1="308" x2="362" y2="308" class="wall"/>
+
+            <rect x="362" y="208" width="258" height="100" class="dash"/>
+
+            <line x1="252" y1="116" x2="276" y2="116" class="door"/>
+            <line x1="438" y1="208" x2="462" y2="208" class="door"/>
+            <line x1="556" y1="208" x2="578" y2="208" class="door"/>
+            <line x1="300" y1="208" x2="322" y2="208" class="door"/>
+            <line x1="322" y1="266" x2="346" y2="266" class="door"/>
+            <line x1="250" y1="308" x2="274" y2="308" class="door"/>
+
+            <line x1="520" y1="174" x2="520" y2="206" class="wall-soft"/>
+            <line x1="540" y1="174" x2="540" y2="206" class="wall-soft"/>
+            <line x1="560" y1="174" x2="560" y2="206" class="wall-soft"/>
+
+            <text x="290" y="170" class="label">COMEDOR</text>
+            <text x="490" y="165" class="label">SALA</text>
+            <text x="556" y="193" class="label-small">ESCALERA HACIA PLANTA ALTA</text>
+
+            <text x="300" y="242" class="label-small">BAÑO SERVICIO</text>
+            <text x="300" y="286" class="label">BODEGA</text>
+
+            <text x="494" y="260" class="label">JARDÍN DELANTERO</text>
+
+            <text x="30" y="36" class="hud">SECTOR PB</text>
+            <text x="630" y="336" class="hud">MAPA ACTIVO</text>
+          </svg>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">PLANTA SUPERIOR</div>
+          <svg viewBox="0 0 720 250" preserveAspectRatio="xMidYMid meet" aria-label="Plano planta superior">
+            <line x1="22" y1="22" x2="72" y2="22" class="wall-soft"/>
+            <line x1="22" y1="22" x2="22" y2="54" class="wall-soft"/>
+            <line x1="698" y1="22" x2="648" y2="22" class="wall-soft"/>
+            <line x1="698" y1="22" x2="698" y2="54" class="wall-soft"/>
+
+            <line x1="150" y1="46" x2="598" y2="46" class="wall"/>
+            <line x1="598" y1="46" x2="598" y2="202" class="wall"/>
+            <line x1="598" y1="202" x2="150" y2="202" class="wall"/>
+            <line x1="150" y1="202" x2="150" y2="46" class="wall"/>
+
+            <line x1="338" y1="46" x2="338" y2="118" class="wall"/>
+            <line x1="488" y1="46" x2="488" y2="118" class="wall"/>
+            <line x1="150" y1="118" x2="168" y2="118" class="wall"/>
+            <line x1="192" y1="118" x2="248" y2="118" class="wall"/>
+            <line x1="280" y1="118" x2="338" y2="118" class="wall"/>
+            <line x1="338" y1="118" x2="430" y2="118" class="wall-soft"/>
+            <line x1="448" y1="118" x2="488" y2="118" class="wall-soft"/>
+            <line x1="488" y1="118" x2="540" y2="118" class="wall"/>
+            <line x1="558" y1="118" x2="598" y2="118" class="wall"/>
+
+            <line x1="226" y1="118" x2="226" y2="202" class="wall"/>
+            <line x1="250" y1="154" x2="300" y2="154" class="wall-soft"/>
+            <line x1="300" y1="154" x2="300" y2="202" class="wall-soft"/>
+            <line x1="430" y1="160" x2="598" y2="160" class="wall-soft"/>
+            <line x1="430" y1="168" x2="430" y2="202" class="wall-soft"/>
+
+            <line x1="176" y1="118" x2="186" y2="118" class="door"/>
+            <line x1="260" y1="118" x2="272" y2="118" class="door"/>
+            <line x1="442" y1="118" x2="454" y2="118" class="door"/>
+            <line x1="546" y1="118" x2="558" y2="118" class="door"/>
+
+            <text x="244" y="88" class="label-small">DORMITORIO PRINCIPAL</text>
+            <text x="412" y="88" class="label">ESTUDIO</text>
+            <text x="544" y="88" class="label">HUÉSPEDES</text>
+
+            <text x="186" y="152" class="label-small">BAÑO</text>
+            <text x="188" y="168" class="label-small">DORMITORIO</text>
+            <text x="188" y="184" class="label-small">PRINCIPAL</text>
+
+            <text x="274" y="186" class="label-small">BAÑO 2</text>
+            <text x="420" y="150" class="label-small">PASILLO CIRCULACIÓN</text>
+            <text x="505" y="184" class="label-small">ESCALERA</text>
+
+            <text x="32" y="36" class="hud">SECTOR PA</text>
+            <text x="615" y="230" class="hud">NIVEL 02</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="info-box">
+        <div class="info-title">TEMPERATURA</div>
+        <div class="info-value" id="weather">CARGANDO...</div>
+      </div>
+
+      <div class="info-box" style="text-align:right;">
+        <div class="info-title">AGENDA</div>
+        <div class="info-value agenda-value" id="calendar">CARGANDO...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateClock() {
+      var now = new Date();
+      var h = now.getHours();
+      var m = now.getMinutes();
+      if (h < 10) h = "0" + h;
+      if (m < 10) m = "0" + m;
+      document.getElementById("clock").innerHTML = h + ":" + m;
+    }
+
+    function updateWeather() {
+      fetch("/api/weather?lat=-34.6&lon=-58.4")
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.current_weather) {
+            document.getElementById("weather").innerHTML =
+              data.current_weather.temperature + "°C";
+          } else {
+            document.getElementById("weather").innerHTML = "SIN DATOS";
+          }
+        })
+        .catch(function() {
+          document.getElementById("weather").innerHTML = "SIN DATOS";
+        });
+    }
+
+    function updateCalendar() {
+      fetch("/api/calendar")
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var el = document.getElementById("calendar");
+
+          if (!data || !data.events || !data.events.length) {
+            el.innerHTML = "SIN EVENTOS";
+            return;
+          }
+
+          var items = data.events.slice(0, 2);
+
+          var lines = items.map(function(ev) {
+            var title = ev.title || "EVENTO";
+            var day = ev.dayLabel || "";
+            var dateNum = ev.dateNum || "";
+            var start = ev.start || "";
+
+            if (ev.allDay) {
+              return day + " " + dateNum + " · " + title;
+            } else {
+              return day + " " + dateNum + " · " + start + " · " + title;
+            }
+          });
+
+          el.innerHTML = lines.join("<br>");
+        })
+        .catch(function() {
+          document.getElementById("calendar").innerHTML = "ERROR AGENDA";
+        });
+    }
+
+    updateClock();
+    updateWeather();
+    updateCalendar();
+
+    setInterval(updateClock, 1000);
+    setInterval(updateWeather, 600000);
+    setInterval(updateCalendar, 300000);
+  </script>
+</body>
+</html>
